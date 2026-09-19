@@ -53,6 +53,9 @@ Giải thích cách tiếp cận của bạn khi lập trình (implement) các p
 **`RecursiveChunker.chunk` / `_split`** — hướng tiếp cận:
 > `_split(text, separators)` là hàm đệ quy. **Base case**: text rỗng → `[]`; text đã ≤ `chunk_size` → trả nguyên `[text]`; hết separator (hoặc separator là `""`) → cắt cứng theo `chunk_size`. **Bước đệ quy**: tách text bằng separator đầu tiên (`\n\n` → `\n` → `. ` → ` `), mảnh nào vẫn quá dài thì gọi lại `_split` với danh sách separator còn lại. Cuối cùng có bước *merge tham lam*: gộp các mảnh liên tiếp lại (nối bằng chính separator đó) miễn là tổng vẫn ≤ `chunk_size`, để tránh sinh ra hàng loạt chunk quá nhỏ chỉ vì text có nhiều xuống dòng.
 
+**`SectionChunker` (chiến lược tuỳ chỉnh cho Giai đoạn 2)** — hướng tiếp cận:
+> Corpus là quy chế đào tạo có cấu trúc `# Điều` › `## Khoản` › điểm `a) b) c)`, nên tôi viết thêm chunker cắt đúng theo tiêu đề Markdown thay vì theo ký tự. `_split_sections` duyệt mọi heading bằng regex `^(#{1,6})\s+(.*)$` và giữ một "vệt" tiêu đề theo cấp để dựng breadcrumb `"Điều X › Khoản Y"`; `_fit` tách Khoản dài hơn `max_chars` tại ranh giới điểm `a)…` (regex `\n(?=[a-zđ]\)\s)`) nhưng lặp lại câu dẫn cho từng mảnh để mảnh nào cũng đọc được độc lập; bước cuối gộp Khoản ngắn hơn `min_chars` vào chunk liền trước. Điểm thiết kế quan trọng nhất rút ra từ ablation: breadcrumb **không** ghép vào nội dung được embed (làm mọi chunk cùng Điều giống nhau → loãng) mà trả ra qua `chunk_with_sections()` để ingest vào `metadata["section"]`; `chunk()` vẫn giữ giao diện `list[str]` như các chunker khác.
+
 ### Lớp EmbeddingStore
 
 **`add_documents` + `search`** — hướng tiếp cận:
@@ -64,7 +67,7 @@ Giải thích cách tiếp cận của bạn khi lập trình (implement) các p
 ### Tác tử KnowledgeBaseAgent
 
 **`answer`** — hướng tiếp cận:
-> Gọi `store.search(question, top_k)`, đánh số từng chunk thành `[1] (source: doc_id) nội dung` rồi ghép thành khối `Context:`. Prompt yêu cầu LLM **chỉ** dùng context đã đánh số, phải trích dẫn số `[n]` đã dùng, và nói "không biết" nếu context không chứa câu trả lời — để dễ kiểm tra grounding. Có hai guard trước khi gọi LLM: store rỗng và search không trả kết quả thì trả về thông báo thay vì gọi LLM với context trống.
+> Gọi `store.search(question, top_k)`, đánh số từng chunk thành `[1] (source: doc_id) nội dung` rồi ghép thành khối `Context:`. Prompt yêu cầu LLM **chỉ** dùng context đã đánh số, phải trích dẫn số `[n]` đã dùng, và nói "không biết" nếu context không chứa câu trả lời — để dễ kiểm tra grounding. Có hai guard trước khi gọi LLM: store rỗng và search không trả kết quả thì trả về thông báo thay vì gọi LLM với context trống. Để phục vụ câu hỏi bắt buộc lọc `audience` của L3A, tôi thêm tham số tuỳ chọn `metadata_filter=None`: có filter thì đi qua `search_with_filter`, không thì giữ nguyên `search` (tests cũ không đổi). Nhãn nguồn trong context cũng ghép thêm `metadata["section"]` nếu có, nên LLM trích được "Điều 19 › Khoản 3" thay vì chỉ `doc_id`.
 
 ---
 
