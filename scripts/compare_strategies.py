@@ -2,22 +2,30 @@
 
 Chạy:  python scripts/compare_strategies.py            (LocalEmbedder nếu cài, ngược lại mock)
        python scripts/compare_strategies.py --mock
+       python scripts/compare_strategies.py --llm      (thêm: agent trả lời 5 câu bằng OpenAI,
+                                                        cần OPENAI_API_KEY trong .env)
 
 In ra các bảng Markdown để dán vào report/REPORT_NHOM.md mục 2.
 """
 from __future__ import annotations
 
+import os
 import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from dotenv import load_dotenv  # noqa: E402
+
+load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
+
 from src import (  # noqa: E402
     ChunkingStrategyComparator,
     Document,
     EmbeddingStore,
     FixedSizeChunker,
+    KnowledgeBaseAgent,
     RecursiveChunker,
     SectionChunker,
     SentenceChunker,
@@ -97,6 +105,34 @@ def build_store(chunker, corpus, embed_fn) -> EmbeddingStore:
     return store
 
 
+def make_openai_llm():
+    """llm_fn cho KnowledgeBaseAgent: gọi OpenAI Chat Completions, temperature 0."""
+    from openai import OpenAI
+
+    client = OpenAI()  # đọc OPENAI_API_KEY từ môi trường (.env đã được nạp)
+    model = os.getenv("OPENAI_CHAT_MODEL", "gpt-4o-mini")
+
+    messages_for = lambda prompt: [  # noqa: E731
+        {"role": "system", "content": "Bạn là trợ lý học vụ. Trả lời bằng tiếng Việt, ngắn gọn, "
+                                      "chỉ dựa vào context được cung cấp và trích số context đã dùng."},
+        {"role": "user", "content": prompt},
+    ]
+
+    def llm_fn(prompt: str) -> str:
+        try:
+            response = client.chat.completions.create(
+                model=model, temperature=0, messages=messages_for(prompt)
+            )
+        except Exception as exc:  # noqa: BLE001 — model đời mới (gpt-5+) không nhận temperature
+            if "temperature" not in str(exc):
+                raise
+            response = client.chat.completions.create(model=model, messages=messages_for(prompt))
+        return (response.choices[0].message.content or "").strip()
+
+    llm_fn.model = model
+    return llm_fn
+
+
 def score_hits(results, gold_doc, gold_text) -> tuple[int, str]:
     """2 = top-1 đúng chunk; 1 = đúng chunk ở top-2/3; 0 = không có trong top-3."""
     for rank, r in enumerate(results, 1):
@@ -168,6 +204,23 @@ def main() -> None:
             snippet = r["content"].replace("\n", " ")[:90]
             print(f"- {r['score']:.3f} `{r['id']}` — {snippet}…")
         print()
+
+    # 4) Tuỳ chọn: agent trả lời bằng LLM thật
+    if "--llm" in sys.argv:
+        if not os.getenv("OPENAI_API_KEY"):
+            print("(--llm bỏ qua: chưa có OPENAI_API_KEY trong .env)")
+            return
+        llm_fn = make_openai_llm()
+        strategy = os.getenv("LLM_STRATEGY", "hung_section(900/250)")
+        agent = KnowledgeBaseAgent(store=stores[strategy], llm_fn=llm_fn)
+        print(f"## Câu trả lời của agent — chiến lược `{strategy}`, LLM `{llm_fn.model}`\n")
+        for qi, (q, gold_doc, gold_text, flt) in enumerate(QUERIES, 1):
+            answer = agent.answer(q, top_k=3, metadata_filter=flt)
+            flag = " *(filter audience=student)*" if flt else ""
+            print(f"**Q{qi}. {q}**{flag}")
+            print(f"> gold: {gold_text}")
+            print(f"> agent: {answer.replace(chr(10), ' ')}")
+            print()
 
 
 if __name__ == "__main__":
