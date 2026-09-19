@@ -1,0 +1,100 @@
+# ket_qua_benchmark — Lê Chí Hùng (G35) — 2026-09-19 17:32
+corpus   : data/quy-dinh-dao-tao
+chunker  : SectionChunker {'max_chars': 900, 'min_chars': 250, 'include_breadcrumb': False}
+embedder : sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+top_k    : 3
+
+Đã nạp 10 tài liệu → 36 chunk (TB 511 ký tự/chunk)
+
+Q1. Sinh viên được đăng ký tối đa bao nhiêu tín chỉ trong học kỳ hè?
+    filter : —    gold: dieu-10-dang-ky-hoc-tap ∋ "tối đa 8 TC"    → top-1, 2/2
+    ✓ top-1  0.7156  dieu-10-dang-ky-hoc-tap#3                            audience=student
+              Điều 10. Đăng ký học tập chương trình đại học › Khoản 2. Số lượng TC đăng ký
+              a) Sinh viên không thuộc diện cảnh báo học tập theo quy định tại khoản 1 Điều 19 của Quy chế này đượ…
+      top-2  0.6324  dieu-10-dang-ky-hoc-tap#4                            audience=student
+              Điều 10. Đăng ký học tập chương trình đại học › Khoản 4
+              Đối với học phần có giờ lên lớp, chỉ mở lớp khi có tối thiểu 20 sinh viên đăng ký học. Các trường hợ…
+      top-3  0.6141  dieu-19-20-canh-bao-hoc-tap-va-buoc-thoi-hoc#1       audience=student
+              Điều 19. Cảnh báo học tập và buộc thôi học › Khoản 2. Hạn chế khối lượng học tập
+              Hạn chế khối lượng học tập là hình thức buộc những sinh viên đang bị cảnh báo học tập từ mức 2 trở l…
+
+Q2. Khi nào sinh viên bị buộc thôi học?
+    filter : —    gold: dieu-19-20-canh-bao-hoc-tap-va-buoc-thoi-hoc ∋ "mức 3 lần thứ hai"    → top-2, 1/2
+      top-1  0.7157  dieu-16-nghi-hoc-tam-thoi-va-thoi-hoc#3              audience=student
+              Điều 16. Nghỉ học tạm thời và tự nguyện thôi học › Khoản 4
+              Khi chế độ nghỉ tạm thời có hiệu lực thì các học phần đã đăng ký học trong học kỳ sẽ bị hủy và tính …
+    ✓ top-2  0.6493  dieu-19-20-canh-bao-hoc-tap-va-buoc-thoi-hoc#2       audience=student
+              Điều 19. Cảnh báo học tập và buộc thôi học › Khoản 3. Buộc thôi học
+              Buộc thôi học là hình thức áp dụng đối với những sinh viên có kết quả học tập rất kém theo một trong…
+      top-3  0.6296  dieu-16-nghi-hoc-tam-thoi-va-thoi-hoc#0              audience=student
+              Điều 16. Nghỉ học tạm thời và tự nguyện thôi học › Khoản 1
+              Nghỉ học tạm thời là trường hợp việc nghỉ học có hiệu lực từ 01 học kỳ trở lên.…
+
+Q3. Nghỉ học tạm thời vì lý do cá nhân thì được nghỉ tối đa bao lâu?
+    filter : —    gold: dieu-16-nghi-hoc-tam-thoi-va-thoi-hoc ∋ "04 học kỳ chính"    → top-1, 2/2
+    ✓ top-1  0.7690  dieu-16-nghi-hoc-tam-thoi-va-thoi-hoc#2              audience=student
+              Điều 16. Nghỉ học tạm thời và tự nguyện thôi học › Khoản 2. Điều kiện, thời gian nghỉ tối đa và tiếp nhận trở lại
+              Điều kiện nghỉ học tạm thời, thời gian nghỉ học tối đa và việc tiếp nhận trở lại học được quy định n…
+    ✓ top-2  0.7607  dieu-16-nghi-hoc-tam-thoi-va-thoi-hoc#1              audience=student
+              Điều 16. Nghỉ học tạm thời và tự nguyện thôi học › Khoản 2. Điều kiện, thời gian nghỉ tối đa và tiếp nhận trở lại
+              Điều kiện nghỉ học tạm thời, thời gian nghỉ học tối đa và việc tiếp nhận trở lại học được quy định n…
+      top-3  0.7531  dieu-16-nghi-hoc-tam-thoi-va-thoi-hoc#0              audience=student
+              Điều 16. Nghỉ học tạm thời và tự nguyện thôi học › Khoản 1
+              Nghỉ học tạm thời là trường hợp việc nghỉ học có hiệu lực từ 01 học kỳ trở lên.…
+
+Q4. Điều kiện để được xét công nhận tốt nghiệp là gì?
+    filter : —    gold: dieu-14-15-dang-ky-tot-nghiep-va-hang-tot-nghiep ∋ "chuẩn ngoại ngữ"    → top-1, 2/2
+    ✓ top-1  0.7594  dieu-14-15-dang-ky-tot-nghiep-va-hang-tot-nghiep#2   audience=student
+              Điều 14. Đăng ký tốt nghiệp đại học › Khoản 3. Điều kiện xét công nhận tốt nghiệp
+              Sinh viên có đủ các điều kiện sau đây thì được xét công nhận tốt nghiệp:  a) Đã hoàn thành đầy đủ cá…
+      top-2  0.7158  dieu-13-dieu-kien-lam-do-an-tot-nghiep#0             audience=student
+              Điều 13. Đồ án/khóa luận tốt nghiệp đại học — điều kiện được giao đề tài
+              Các học phần tốt nghiệp bao gồm đồ án tốt nghiệp cử nhân, khóa luận tốt nghiệp cử nhân (ĐATN). Sinh …
+      top-3  0.6427  dieu-14-15-dang-ky-tot-nghiep-va-hang-tot-nghiep#3   audience=student
+              Điều 14. Đăng ký tốt nghiệp đại học › Khoản 5
+              Sinh viên đã hết thời gian học tập tối đa theo quy định tại khoản 3 Điều 3 của Quy chế này nhưng chư…
+
+Q5. Điểm ĐATN được tính từ điểm quá trình và điểm cuối kỳ theo trọng số nào?
+    filter : {'audience': 'student'}    gold: dieu-13-dieu-kien-lam-do-an-tot-nghiep ∋ "trọng số 0,5"    → top-1, 2/2
+    ✓ top-1  0.5280  dieu-13-dieu-kien-lam-do-an-tot-nghiep#0             audience=student
+              Điều 13. Đồ án/khóa luận tốt nghiệp đại học — điều kiện được giao đề tài
+              Các học phần tốt nghiệp bao gồm đồ án tốt nghiệp cử nhân, khóa luận tốt nghiệp cử nhân (ĐATN). Sinh …
+      top-2  0.4760  dieu-19-20-canh-bao-hoc-tap-va-buoc-thoi-hoc#0       audience=student
+              Điều 19. Cảnh báo học tập và buộc thôi học › Khoản 1. Mức cảnh báo học tập
+              Kết quả học tập được đánh giá vào cuối mỗi học kỳ chính để xác định mức độ cảnh báo học tập với sinh…
+      top-3  0.4493  dieu-11-cong-nhan-chuyen-doi-tin-chi#1               audience=student
+              Điều 11. Công nhận kết quả học tập và chuyển đổi tín chỉ › Khoản 2
+              Xem xét công nhận, chuyển đổi TC trên cơ sở đối sánh chuẩn đầu ra, nội dung và khối lượng học tập, c…
+
+Điểm truy xuất (2 = gold ở top-1, 1 = top-2/3, 0 = miss): 9/10
+
+## Câu trả lời của KnowledgeBaseAgent — LLM gpt-4o-mini
+
+Q1. Sinh viên được đăng ký tối đa bao nhiêu tín chỉ trong học kỳ hè?
+    gold : tối đa 8 TC
+    agent: Sinh viên được đăng ký tối đa 8 tín chỉ trong học kỳ hè [1].
+
+Q2. Khi nào sinh viên bị buộc thôi học?
+    gold : mức 3 lần thứ hai
+    agent: Sinh viên bị buộc thôi học khi có kết quả học tập rất kém, cụ thể là khi bị cảnh báo học tập mức 3 lần thứ hai liên tiếp hoặc học chậm tiến độ quá thời gian cho phép, hoặc không còn đủ khả năng tốt nghiệp trong thời gian cho phép [2].
+
+Q3. Nghỉ học tạm thời vì lý do cá nhân thì được nghỉ tối đa bao lâu?
+    gold : 04 học kỳ chính
+    agent: Nghỉ học tạm thời vì lý do cá nhân thì được nghỉ tối đa 04 học kỳ chính, và thời gian này sẽ được tính vào thời gian học chậm tiến độ [1].
+
+Q4. Điều kiện để được xét công nhận tốt nghiệp là gì?
+    gold : chuẩn ngoại ngữ
+    agent: Điều kiện để được xét công nhận tốt nghiệp bao gồm:
+
+a) Hoàn thành đầy đủ các học phần theo yêu cầu của chương trình đào tạo trong thời gian quy định, bao gồm cả các học phần Giáo dục thể chất và Giáo dục quốc phòng-an ninh.
+
+b) Đạt chuẩn ngoại ngữ đầu ra.
+
+c) Điểm trung bình tích lũy toàn khóa đạt từ 2,0 trở lên.
+
+d) Tại thời điểm xét tốt nghiệp không bị truy cứu trách nhiệm hình sự hoặc không đang trong thời gian bị kỷ luật ở mức đình chỉ học tập. [1]
+
+Q5. Điểm ĐATN được tính từ điểm quá trình và điểm cuối kỳ theo trọng số nào?  [filter {'audience': 'student'}]
+    gold : trọng số 0,5
+    agent: Điểm ĐATN được tính từ các điểm thành phần theo trọng số 0,5 đối với điểm quá trình và trọng số 0,5 đối với điểm cuối kỳ [1].
+
