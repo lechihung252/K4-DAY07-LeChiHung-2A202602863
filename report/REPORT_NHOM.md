@@ -156,12 +156,14 @@ Chạy 5 câu hỏi đánh giá của nhóm (mục 3) với `top_k=3`. Điểm �
 | 5 | Điểm ĐATN tính từ điểm quá trình và điểm cuối kỳ theo trọng số nào? *(filter `audience=student`)* | 2 | 2 | 2 | 2 |
 | | **Tổng /10** | **8** | **8** | **8** | **9** |
 
+> Lưu ý: cột "Hưởng — Recursive" ở bảng trên là mô phỏng cùng tham số trong repo này (45 chunk). Trên **code riêng của Hưởng**, cùng tham số nhưng cách gắn separator `"\n## "` vào *đầu* section kế tiếp sinh ra **50 chunk**, trong đó có chunk chỉ chứa dòng tiêu đề; kết quả thật của Hưởng là Q1 2, **Q2 0** (chunk Điều 19 ở top-2 chỉ là tiêu đề, không chứa hai điều kiện), Q3 1, Q4 2, Q5 2 = **7/10** (chi tiết trong `REPORT_CANHAN.md` của Hưởng). Mục 3 dùng số thật của từng người.
+
 Điểm số sát nhau vì corpus nhỏ (19k ký tự) và các câu 1, 4, 5 đều có từ khoá rất đặc trưng — mọi cách cắt đều tìm ra. Khác biệt chỉ xuất hiện ở hai câu khó: **Q2** (baseline miss hoàn toàn, hai chiến lược nhận biết Khoản đưa được đúng chunk vào top-2) và **Q3** (chunk gộp trọn Khoản 2 của Section lên top-1, còn Recursive cắt Khoản 2 thành 2 mảnh nên mảnh chứa điểm `d)` tụt xuống top-2).
 
 | Thành viên | Chiến lược (Strategy) | Điểm truy xuất (/10) | Điểm mạnh | Điểm yếu |
 |-----------|----------|----------------------|-----------|----------|
 | Lê Chí Hùng | `SectionChunker` v2 (custom, theo Điều/Khoản; breadcrumb trong metadata) | 9 | 100% chunk đúng ranh giới Khoản; ít chunk nhất (36) nên ít nhiễu; một Khoản liệt kê điều kiện nằm trọn một chunk (thắng Q3); `metadata["section"]` cho phép agent trích "Điều 16 Khoản 2" | Chunk dài nhất (TB 511, max 916) → tốn token prompt hơn; phụ thuộc vào việc tài liệu có heading Markdown chuẩn (`# Điều`, `## Khoản`); Q2 vẫn thua chunk "tự nguyện thôi học" |
-| Nguyễn Văn Hưởng | `RecursiveChunker` tinh chỉnh (`"\n## "`, 600) | 8 | Không cần code mới; chunk vừa phải (TB 428); tôn trọng ranh giới Khoản nhờ separator `"\n## "`; Q2 ngang Section | Cắt theo giới hạn ký tự nên Khoản dài (Điều 16 Khoản 2, ~1000 ký tự) bị vỡ thành 2 mảnh theo dòng trống, mảnh sau mất câu dẫn (thua Q3); tiêu đề mất dấu `##`; không có ngữ cảnh Điều để trích nguồn |
+| Nguyễn Văn Hưởng | `RecursiveChunker` tinh chỉnh (`"\n## "`, 600) | 8 (mô phỏng trong repo này) / **7 (code riêng của Hưởng)** | Không cần code mới; chunk vừa phải (TB 428); tôn trọng ranh giới Khoản nhờ separator `"\n## "`; Q2 ngang Section | Cắt theo giới hạn ký tự nên Khoản dài (Điều 16 Khoản 2, ~1000 ký tự) bị vỡ thành 2 mảnh theo dòng trống, mảnh sau mất câu dẫn (thua Q3); tiêu đề mất dấu `##`; không có ngữ cảnh Điều để trích nguồn |
 | (baseline) | `FixedSizeChunker(500/50)` | 8 | Overlap 50 tình cờ giữ được câu chứa đáp án ở Q1, Q3, Q5 | 77% chunk cắt giữa câu (ví dụ chunk mở đầu `"hè không có đợt điều chỉnh đăng ký. ## Khoản 2…"`); Q2 miss; điểm similarity thấp nhất ở Q5 (0.487) |
 | (baseline) | `SentenceChunker(3)` | 8 | Không cắt giữa câu; Q5 có điểm cao nhất (0.681) vì chunk 3 câu rất ngắn khớp đúng câu "Điểm ĐATN…" | Không biết ranh giới Khoản: các điểm `a); b); c)` kết thúc bằng `;` bị coi là một câu → chunk dài bất thường (max 780); Q2 miss |
 
@@ -206,29 +208,36 @@ Chạy 5 câu hỏi đánh giá của nhóm (mục 3) với `top_k=3`. Điểm �
 
 > Cách chấm (theo `docs/SCORING.md`): **2 điểm/câu** — top-3 chứa chunk liên quan + agent trả lời đúng (2), có liên quan nhưng thiếu/không ở top-1 (1), không có trong top-3 (0).
 
+Mỗi thành viên chạy trên **code cá nhân** của mình (chi tiết top-3 và câu trả lời trong `REPORT_CANHAN.md` từng người):
+- **Hùng** — `SectionChunker` v2 (36 chunk), LLM thật `gpt-4o-mini`.
+- **Hưởng** — `RecursiveChunker(600, "\n## ")` (50 chunk), LLM `demo_llm` của `main.py` (chỉ lặp lại prompt, không sinh câu trả lời) → phần "agent trả lời đúng" của Hưởng không đạt được 2 điểm dù retrieval đúng; Hưởng ghi riêng "điểm truy xuất có thể trả lời" = 7/10.
+
 | # | Câu hỏi | Chiến lược tốt nhất cho câu này | Có chunk liên quan trong top-3? | Ghi chú |
 |---|---------|-------------------------------|-------------------------------|---------|
-| 1 | | | | |
-| 2 | | | | |
-| 3 | | | | |
-| 4 | | | | |
-| 5 | | | | |
+| 1 | Tối đa bao nhiêu TC trong học kỳ hè? | Hoà — cả hai top-1 (Section 0,716 / Recursive 0,689) | Hùng ✅ top-1 · Hưởng ✅ top-1 | Agent Hùng: "tối đa 8 tín chỉ… [1]" ✔. Điểm: Hùng **2**, Hưởng **1** (retrieval 2 nhưng demo_llm không trả lời) |
+| 2 | Khi nào bị buộc thôi học? | **Section** — chunk Điều 19 K3 trọn vẹn ở top-2; Recursive của Hưởng chỉ có chunk *tiêu đề* Điều 19 ở top-2 | Hùng ✅ top-2 · Hưởng ❌ (top-3 không chunk nào chứa đáp án) | Cả hai top-1 đều rơi vào Điều 16 "tự nguyện thôi học". Agent Hùng (`gpt-4o-mini`) tự bỏ [1], trích [2] và trả lời đúng. Điểm: Hùng **1**, Hưởng **0** |
+| 3 | Nghỉ học tạm thời vì lý do cá nhân tối đa bao lâu? | **Section** — giữ trọn Khoản 2 Điều 16 (mảnh d–đ kèm câu dẫn) ở top-1; Recursive cắt Khoản 2 thành 2 mảnh, mảnh chứa điểm d) tụt top-2 | Hùng ✅ top-1 · Hưởng ✅ top-2 | Agent Hùng: "04 học kỳ chính… tính vào thời gian học chậm tiến độ [1]" ✔. Điểm: Hùng **2**, Hưởng **1** |
+| 4 | Điều kiện xét công nhận tốt nghiệp? | Hoà — cả hai top-1, chunk chứa đủ 4 điểm a–d | Hùng ✅ top-1 · Hưởng ✅ top-1 | Agent Hùng liệt kê nguyên văn 4 điều kiện ✔. Điểm: Hùng **2**, Hưởng **1** |
+| 5 | Trọng số điểm ĐATN? *(filter `audience=student`)* | Hoà — cả hai top-1 **sau khi lọc** | Hùng ✅ top-1 · Hưởng ✅ top-1 | Không lọc: Hùng top-1 là doc faculty (0,62 > 0,53); Hưởng **cả top-3** là doc faculty. Agent Hùng: "0,5 … và 0,5 … [1]" ✔. Điểm: Hùng **2**, Hưởng **1** |
+| | **Tổng (rubric 2/1/0)** | Section 9/10 · Recursive 4/10 (retrieval 7/10) | Hùng 5/5 · Hưởng 4/5 | Khoảng cách 9 vs 4 chủ yếu do **LLM**, không phải chunking: cùng retrieval Hưởng nếu có LLM thật sẽ ≈ 7/10 |
 
 **Lọc bằng metadata có giúp ích không? Ở câu hỏi nào?**
-> *Viết 2-3 câu:*
+> **Có, ở Q5 (`audience`) — và đo thêm thấy có ở cả Q2 (`category`).** Ở Q5, không lọc thì tài liệu hướng dẫn chấm cho giảng viên (`audience=faculty`) chiếm top-1 với cả hai chiến lược (với Recursive chiếm cả top-3); lọc `audience=student` đưa đúng tài liệu sinh viên lên top-1. Hưởng chỉ ra chính xác một điểm tinh tế: chunk faculty cũng chứa "0,5/0,5", nên ở câu này filter đổi **nguồn trích dẫn đúng đối tượng** chứ chưa đổi đáp án số — đó vẫn là đúng yêu cầu L3A ("tránh lấy tài liệu dành cho đối tượng khác"), nhưng nếu muốn filter quyết định *độ đúng* thì corpus cần một cặp student/faculty có nội dung khác nhau thật sự. Với Q2, nhóm đo thử `metadata_filter={"category": "academic-warning"}` (trường đã có sẵn trong schema): chunk "Buộc thôi học" lên **top-1 với 3/4 chiến lược** (Section 0,649; Recursive 0,658; Sentence 0,632), chỉ Fixed vẫn miss vì chunk cắt giữa câu. Bài học: filter theo `category` giải quyết được lỗi nhầm chủ đề mà embedder không tự phân biệt — nhưng cần một bước định tuyến (router) từ câu hỏi → category, chưa có trong agent hiện tại.
 
 ---
 
 ## 4. Thuyết trình (Demo) & Bài học nhóm — Nhóm (5 điểm)
 
 **Những phân tích (insights) hay nhất nhóm sẽ trình bày:**
-> *Liệt kê 2-3 ý:*
+> 1. **Ranh giới Khoản quan trọng hơn kích thước chunk.** Baseline `fixed_size` cắt giữa câu ở 77% chunk; hai chiến lược nhận biết `## Khoản` (Section, Recursive có separator `"\n## "`) là hai chiến lược duy nhất đưa được câu khó Q2 vào top-3. Nhưng "nhận biết Khoản" chưa đủ: bản Recursive của Hưởng sinh chunk chỉ có tiêu đề, và Q2 rớt về 0 — chunk phải là *một quy định trọn vẹn* (câu dẫn + các điểm a/b/c).
+> 2. **Ngữ cảnh phụ nên đi vào metadata, không nhồi vào nội dung embed.** Ablation `SectionChunker` v1 → v2: ghép breadcrumb "Điều X › Khoản Y" vào nội dung làm mọi chunk cùng Điều giống nhau hơn và Q3 tụt hạng; chuyển sang `metadata["section"]` vừa giữ được trích dẫn vừa tăng điểm (8 → 9).
+> 3. **Filter metadata là công cụ sửa lỗi ngữ nghĩa của embedder.** MiniLM không phân biệt "buộc thôi học" với "tự nguyện thôi học" (Q2) và xếp hướng dẫn cho giảng viên trên quy định cho sinh viên (Q5). `audience=student` sửa Q5; `category=academic-warning` sửa Q2 cho 3/4 chiến lược. Demo live: chạy `python scripts/compare_strategies.py --llm` và bật/tắt filter ở Q5.
 
 **Bài học rút ra khi so sánh trong nhóm:**
-> *Viết 2-3 câu — cùng tài liệu nhưng chiến lược khác nhau dẫn tới khác biệt gì?*
+> Cùng 10 tài liệu, cùng 5 câu hỏi, cùng embedder, nhưng điểm truy xuất dao động 7–9/10 chỉ vì cách cắt; và khi tính cả agent thì 4 với 9 — khoảng cách lớn nhất không đến từ chunking mà từ việc **có LLM thật hay không** (Hưởng chạy `demo_llm` nên mất 1 điểm ở mỗi câu retrieval đúng). Hai bản `RecursiveChunker` cùng tham số nhưng khác một chi tiết cài đặt (separator gắn vào cuối hay đầu section) cho 45 và 50 chunk và lệch 1 điểm — nhắc nhóm rằng **so sánh chiến lược phải so trên cùng một cài đặt hoặc ghi rõ khác biệt**, không chỉ so tên chiến lược. Cuối cùng, câu hỏi khó (Q2) mới phân biệt được chiến lược; ba câu dễ ai cũng 2 điểm nên không nói lên gì.
 
 **Nếu làm lại, nhóm sẽ thay đổi gì trong chiến lược dữ liệu (data strategy)?**
-> *Viết 2-3 câu:*
+> (1) **Thiết kế corpus để filter có ý nghĩa thật:** thêm ít nhất một cặp tài liệu student/faculty (hoặc staff) có nội dung *khác nhau* về cùng chủ đề — ví dụ quy trình phúc khảo cho sinh viên và quy trình chấm phúc khảo cho giảng viên — để `audience` quyết định độ đúng chứ không chỉ nguồn trích dẫn. (2) **Gán `keywords`/`aliases` khi ingest** ("ĐATN" ↔ "đồ án tốt nghiệp", "buộc thôi học") vì Q5 có score thấp nhất (0,53) do câu hỏi dùng viết tắt. (3) **Chốt bộ câu hỏi và tiêu chí chấm (chuỗi gold phải nằm trong *một* chunk) trước khi ai đo gì**, và mỗi người ghi rõ số chunk + bản cài đặt để kết quả đối chiếu được — điều nhóm chỉ làm được ở lần chạy thứ hai.
 
 ---
 
@@ -236,8 +245,8 @@ Chạy 5 câu hỏi đánh giá của nhóm (mục 3) với `top_k=3`. Điểm �
 
 | Tiêu chí | Điểm tự đánh giá |
 |----------|-------------------|
-| Lựa chọn tài liệu (Document Set Quality) | / 10 |
-| Thiết kế chiến lược (Strategy Design) | / 15 |
-| Chất lượng truy xuất (Retrieval Quality) | / 10 |
-| Thuyết trình (Demo) | / 5 |
-| **Tổng phần nhóm** | **/ 40** |
+| Lựa chọn tài liệu (Document Set Quality) | 9 / 10 — 10 tài liệu một nguồn công khai, metadata đầy đủ; trừ 1 vì chỉ có 1 tài liệu faculty nên filter `audience` mới đổi nguồn chứ chưa đổi đáp án |
+| Thiết kế chiến lược (Strategy Design) | 14 / 15 — 2 chiến lược khác nhau + baseline, có ablation và giải thích; trừ 1 vì bản Recursive của hai người không đồng nhất |
+| Chất lượng truy xuất (Retrieval Quality) | 7 / 10 — Section 9/10 với LLM thật; Recursive 7/10 retrieval nhưng 4/10 theo rubric vì chưa dùng LLM thật |
+| Thuyết trình (Demo) | 4 / 5 — có script chạy live và 3 insight; chưa tập trình bày |
+| **Tổng phần nhóm** | **34 / 40** |
