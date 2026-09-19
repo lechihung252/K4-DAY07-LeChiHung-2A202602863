@@ -150,26 +150,28 @@ Embedder dùng để đo: `sentence-transformers/paraphrase-multilingual-MiniLM-
 
 Chạy **5 câu hỏi đánh giá của nhóm** trên mã nguồn cá nhân của bạn trong gói `src`. **5 câu hỏi này phải trùng với các thành viên cùng nhóm** (xem `REPORT_NHOM.md`).
 
-**Cấu hình của tôi:** corpus `data/university/` (2 tài liệu khởi động), frontmatter YAML được parse thành metadata (`audience`, `department`, `source_url`, `retrieved_at`, `document_version`); chunk bằng `SentenceChunker(max_sentences_per_chunk=2)` → 4 chunks; embedder `LocalEmbedder`; LLM giả lập trả về chunk `[1]` để kiểm tra grounding.
+**Cấu hình của tôi:** corpus nhóm `data/quy-dinh-dao-tao/` (10 tài liệu, 19 368 ký tự), frontmatter YAML parse thành metadata (`audience`, `category`, `article`, `source_url`, `retrieved_at`, `document_version`, …); chunk bằng **`SectionChunker(max_chars=900, min_chars=250)` v2** (chiến lược cá nhân — cắt theo Điều/Khoản, breadcrumb đưa vào `metadata["section"]`) → **36 chunks**; embedder `LocalEmbedder` (`paraphrase-multilingual-MiniLM-L12-v2`); `top_k=3`; LLM giả lập trích lại context `[1]` để kiểm tra grounding (agent chỉ "đúng" khi chunk top-1 thật sự chứa đáp án). Câu 5 chạy qua `agent.answer(q, metadata_filter={"audience": "student"})`. Lệnh tái lập: `python scripts/compare_strategies.py` (cột `hung_section`).
 
 | # | Câu hỏi (Query) | Top-1 Chunk truy xuất được (tóm tắt) | Điểm Score | Có liên quan không? (Relevant) | Câu trả lời của Agent (tóm tắt) |
 |---|-------|--------------------------------|-------|-----------|------------------------|
-| 1 | Học phần tiên quyết là gì và khi nào cần kiểm tra? | `course-registration#0` — "...Một học phần có thể yêu cầu học phần tiên quyết; sinh viên cần kiểm tra điều kiện trước khi xác nhận đăng ký." | 0.611 | ✅ | Dẫn [1]: kiểm tra điều kiện tiên quyết trước khi xác nhận đăng ký |
-| 2 | Bị trùng lịch học thì phải làm sao? | `course-registration#1` — "Khi gặp lỗi trùng lịch, sinh viên điều chỉnh lớp học phần trước thời hạn điều chỉnh..." | 0.244 | ✅ (nhưng score thấp, top-2 là chunk thư viện 0.235) | Dẫn [1]: điều chỉnh lớp trước hạn điều chỉnh |
-| 3 | Cần mang gì khi mượn tài liệu ở thư viện? | `library-services#0` — "...Người dùng cần mang thẻ định danh hợp lệ khi sử dụng dịch vụ mượn." | 0.714 | ✅ | Dẫn [1]: mang thẻ định danh hợp lệ |
-| 4 | Gửi yêu cầu ngoại lệ về đăng ký học phần ở đâu? *(filter `audience=student`)* | `course-registration#0` — đoạn giới thiệu đăng ký học phần | 0.526 | ❌ top-1 sai; chunk đúng (`#1`, "gửi qua kênh hỗ trợ học vụ chính thức") xếp thứ 2 với 0.521 | Dẫn [1] → trả lời lạc, dù context [2] có đáp án |
-| 5 | Thời hạn mượn sách thư viện là bao lâu? | `library-services#0` — giới thiệu dịch vụ mượn | 0.525 | ⚠️ đúng tài liệu nhưng **corpus chưa có** thời hạn mượn | Dẫn [1] → không có con số; LLM thật nên trả lời "không biết" |
+| 1 | Sinh viên được đăng ký tối đa bao nhiêu TC trong học kỳ hè? | `dieu-10::c3` — Điều 10 › Khoản 2. Số lượng TC đăng ký ("…tối đa 24 TC và tối thiểu 12 TC trong học kỳ chính… tối đa 8 TC trong học kỳ hè") | 0.716 | ✅ top-1 đúng; top-2 Khoản 4 (mở lớp), top-3 Điều 19 K2 (hạn chế khối lượng) đều cùng chủ đề TC | Dẫn [1]: 8 TC trong học kỳ hè — **đúng** (2/2) |
+| 2 | Khi nào sinh viên bị buộc thôi học? | `dieu-16::c3` — Điều 16 › Khoản 4 ("Khi chế độ nghỉ tạm thời có hiệu lực thì các học phần đã đăng ký… bị hủy") | 0.716 | ❌ top-1 sai; chunk đúng `dieu-19-20::c2` (Điều 19 › Khoản 3. Buộc thôi học) ở **top-2** với 0.649 | Dẫn [1] → trả lời lạc sang nghỉ học tạm thời dù [2] có đáp án — 1/2 |
+| 3 | Nghỉ học tạm thời vì lý do cá nhân được nghỉ tối đa bao lâu? | `dieu-16::c2` — Điều 16 › Khoản 2 (mảnh chứa điểm d: "…học ít nhất một học kỳ… tối đa 04 học kỳ chính… tính vào thời gian học chậm tiến độ") | 0.769 | ✅ top-1 đúng; top-2 là mảnh đầu của cùng Khoản 2 (0.761) | Dẫn [1]: 04 học kỳ chính, tính vào chậm tiến độ — **đúng** (2/2) |
+| 4 | Điều kiện để được xét công nhận tốt nghiệp là gì? | `dieu-14-15::c2` — Điều 14 › Khoản 3. Điều kiện xét công nhận tốt nghiệp (trọn 4 điểm a–d trong một chunk) | 0.759 | ✅ top-1 đúng và đủ 4 điều kiện | Dẫn [1]: liệt kê đủ a) hoàn thành CTĐT, b) chuẩn ngoại ngữ, c) CPA ≥ 2,0, d) không bị kỷ luật — **đúng** (2/2) |
+| 5 | Điểm ĐATN tính từ điểm quá trình và điểm cuối kỳ theo trọng số nào? *(filter `audience=student`)* | `dieu-13-dieu-kien::c0` — Điều 13 (bản student, gộp mở đầu + Khoản 1 + Khoản 2a: "trọng số 0,5 … và 0,5 …") | 0.528 | ✅ top-1 đúng nhờ filter — **không lọc**, top-1 là `dieu-13-cham-diem` (`audience=faculty`, 0.62) | Dẫn [1]: 0,5 quá trình + 0,5 cuối kỳ — **đúng** (2/2) |
 
-**Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** 4 / 5 (câu 5 không tính vì đáp án chưa tồn tại trong corpus; câu 4 chunk đúng nằm ở top-2).
+**Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** **5 / 5** (4 câu ở top-1, câu 2 ở top-2). Điểm theo `docs/SCORING.md`: 2 + 1 + 2 + 2 + 2 = **9 / 10**.
+
+**So với hai baseline trên cùng 5 câu** (`FixedSizeChunker(500/50)`: 8, `SentenceChunker(3)`: 8) và chiến lược của Hưởng (`RecursiveChunker` tinh chỉnh: 8): `SectionChunker` hơn đúng 1 điểm ở câu 3 — nhờ giữ trọn Khoản 2 Điều 16 (kèm câu dẫn) trong một chunk thay vì để mảnh chứa điểm d) đứng riêng. Chi tiết ablation ở `REPORT_NHOM.md` mục 2.
 
 **Điều hay nhất tôi học được từ thành viên khác / nhóm khác (qua demo):**
 > *(Điền sau buổi demo nhóm.)*
 
 ### Phân tích lỗi (Bài tập 3.5)
 
-- **Câu 4 — precision / chunk coherence:** hai chunk của cùng tài liệu chỉ chênh 0.005 điểm; chunk `#0` thắng vì chứa tiêu đề "# Đăng ký học phần" trùng với từ khoá trong câu hỏi, còn ý "yêu cầu ngoại lệ" chỉ là một câu ngắn nằm cuối chunk `#1`. Filter `audience=student` hoạt động đúng (loại chunk thư viện `audience=all`) nhưng không giúp phân biệt trong nội bộ một tài liệu. **Cải thiện:** chunk theo mục/heading để mỗi quy định là một chunk riêng, hoặc bỏ dòng tiêu đề ra khỏi nội dung embed và đưa vào metadata `title`.
-- **Câu 2 — score tuyệt đối thấp (0.244):** câu hỏi dùng khẩu ngữ ("bị trùng lịch học thì phải làm sao") còn văn bản dùng ngôn ngữ hành chính ("lỗi trùng lịch... điều chỉnh lớp học phần"); mô hình MiniLM đa ngữ chỉ bắt được phần nào. Nếu đặt ngưỡng score (ví dụ 0.3) để lọc nhiễu thì câu này sẽ bị loại oan. **Cải thiện:** dùng embedder mạnh hơn cho tiếng Việt hoặc bổ sung câu hỏi mẫu (FAQ-style) vào đầu mỗi chunk.
-- **Câu 5 — grounding:** retrieval trả về đúng tài liệu nhưng tài liệu chưa có thông tin; đây là lỗi *dữ liệu* chứ không phải lỗi thuật toán — nhắc nhóm phải bổ sung quy định mượn/gia hạn từ nguồn chính thức trước khi chốt gold answer, và prompt của agent phải bắt LLM nói "không biết" thay vì bịa.
+- **Câu 2 — precision / giới hạn embedder:** cả 4 chiến lược nhóm thử đều xếp các chunk của Điều 16 (nghỉ học tạm thời, *tự nguyện* thôi học) trên Khoản 3 Điều 19 (*buộc* thôi học). MiniLM đa ngữ bám vào cụm "thôi học"/"nghỉ học" và không phân biệt được sắc thái "buộc" ↔ "tự nguyện"; đây là lỗi *ngữ nghĩa của embedder* chứ không phải lỗi cắt chunk (chunk Điều 19 K3 đã là một khối trọn vẹn, có tiêu đề "Buộc thôi học" trong `section`). Với LLM giả lập trích [1], agent trả lời lạc; LLM thật đọc cả [2] có thể tự sửa nhưng không nên trông chờ. **Cải thiện:** (1) lọc `metadata_filter={"category": "academic-warning"}` khi câu hỏi có từ khoá "buộc thôi học/cảnh báo" — đã có sẵn trường này; (2) hybrid search: cộng điểm BM25 để từ "buộc" có trọng số; (3) đưa `section` vào nội dung embed *chỉ với phần tên Khoản* (không kèm tên Điều) — ablation cho thấy nhồi cả breadcrumb dài làm loãng embedding.
+- **Câu 5 — metadata utility:** không lọc `audience`, top-1 là tài liệu hướng dẫn chấm điểm cho giảng viên (0.62 > 0.53) vì nó lặp lại nhiều lần các cụm "điểm quá trình", "điểm cuối kỳ", "hội đồng". Score tuyệt đối của chunk đúng chỉ 0.528 — thấp nhất trong 5 câu — vì câu hỏi dùng viết tắt "ĐATN" còn chunk student rất ngắn (491 ký tự). Filter cứu được câu này nhưng cũng cho thấy **filter là điều kiện cần chứ không đủ**: nếu corpus có thêm tài liệu student nói về "điểm quá trình" (ví dụ Điều 12 đánh giá học phần) thì chunk đúng vẫn có thể rớt. **Cải thiện:** thêm trường `keywords`/`aliases` ("ĐATN" ↔ "đồ án tốt nghiệp") vào metadata hoặc mở rộng từ viết tắt trong câu hỏi trước khi embed.
+- **Câu 3 — chunk coherence (điểm mạnh nhưng có giá):** Khoản 2 Điều 16 dài ~1 000 ký tự nên `SectionChunker` phải tách thành 2 mảnh theo điểm a)–c) / d)–đ), mỗi mảnh vẫn giữ câu dẫn. Nhờ vậy mảnh chứa d) lên top-1; nhưng hai mảnh cùng Khoản chiếm top-1 và top-2 (0.769 / 0.761), đẩy các Khoản khác ra khỏi top-3 → nếu câu hỏi cần thông tin từ 2 Khoản khác nhau thì `top_k=3` sẽ thiếu. **Cải thiện:** khử trùng lặp theo `section` khi lấy top-k (mỗi Khoản chỉ giữ mảnh điểm cao nhất) hoặc tăng `top_k` lên 5 cho câu hỏi tổng hợp.
 
 --
 
@@ -181,5 +183,5 @@ Chạy **5 câu hỏi đánh giá của nhóm** trên mã nguồn cá nhân củ
 | Hướng tiếp cận của tôi (My Approach) | 9 / 10 |
 | Hoàn thiện code (Core Implementation — tests) | 30 / 30 |
 | Dự đoán độ tương tự (Similarity Predictions) | 5 / 5 |
-| Kết quả truy xuất của tôi (Competition Results) | 8 / 10 |
-| **Tổng phần cá nhân** | **57 / 60** |
+| Kết quả truy xuất của tôi (Competition Results) | 9 / 10 |
+| **Tổng phần cá nhân** | **58 / 60** |

@@ -15,31 +15,51 @@
 
 ### Chủ đề (Domain) & Lý Do Chọn
 
-**Chủ đề:** [ví dụ: Customer support FAQ, Luật Việt Nam, công thức nấu ăn, ...]
+**Chủ đề:** Quy chế đào tạo đại học của Đại học Bách khoa Hà Nội (Quyết định 5445/QĐ-ĐHBK, 28/5/2025) — Chương II, các Điều 10–20 về đăng ký học tập, đánh giá kết quả, đồ án tốt nghiệp, tốt nghiệp, nghỉ học, chuyển chương trình, cảnh báo học tập và buộc thôi học.
 
 **Tại sao nhóm chọn chủ đề này?**
-> *Viết 2-3 câu:*
+> Đây đúng là loại câu hỏi sinh viên hay tra nhất ("được đăng ký tối đa bao nhiêu TC?", "bao giờ bị buộc thôi học?") và câu trả lời phải **chính xác từng con số**, nên là bài kiểm tra tốt cho retrieval — sai chunk là sai đáp án. Văn bản có cấu trúc Điều › Khoản › điểm a/b/c rõ ràng, cho phép nhóm thử chunking theo tiêu đề/mục (yêu cầu L3A) và so sánh với cách cắt theo ký tự. Nguồn là một PDF công khai duy nhất trên cổng thông tin đào tạo HUST, có số hiệu và ngày ban hành, nên `document_version` xác định được rõ ràng và không có vấn đề bản quyền/dữ liệu cá nhân.
 
 ### Danh sách tài liệu (Data Inventory)
 
-| # | Tên tài liệu | Nguồn (Source URL) | Ngày lấy / Phiên bản | Số ký tự | Metadata đã gán |
+Một PDF nguồn được tách thành 10 tài liệu, mỗi tài liệu = một Điều (hoặc hai Điều ngắn liên quan) để mỗi `doc_id` là một chủ đề tra cứu riêng và có thể gán `audience`/`category` khác nhau. Số ký tự tính trên phần nội dung (không tính frontmatter). Bảng nguồn dạng máy đọc: `data/quy-dinh-dao-tao/sources.csv`.
+
+| # | Tên tài liệu (`doc_id`) | Nguồn (Source URL) | Ngày lấy / Phiên bản | Số ký tự | Metadata đã gán |
 |---|--------------|------------|--------------------|----------|-----------------|
-| 1 | | | | | |
-| 2 | | | | | |
-| 3 | | | | | |
-| 4 | | | | | |
-| 5 | | | | | |
+| 1 | Điều 10. Đăng ký học tập chương trình đại học (`dieu-10-dang-ky-hoc-tap`) | [QCDT_2025_5445_QD-DHBK.pdf](https://ctt.hust.edu.vn/Upload/Nguy%E1%BB%85n%20Qu%E1%BB%91c%20%C4%90%E1%BA%A1t/files/DTDH_QDQC/Hoctap/QCDT_2025_5445_QD-DHBK.pdf) | 2026-09-19 / 5445/QĐ-ĐHBK (28/05/2025) | 3 172 | audience=student, category=registration, article=10 |
+| 2 | Điều 11. Công nhận kết quả học tập và chuyển đổi tín chỉ (`dieu-11-cong-nhan-chuyen-doi-tin-chi`) | *như trên* | 2026-09-19 / 5445/QĐ-ĐHBK | 1 412 | audience=student, category=credit-transfer, article=11 |
+| 3 | Điều 12. Ý kiến phản hồi của người học, đánh giá kết quả học tập (`dieu-12-danh-gia-ket-qua-hoc-tap`) | *như trên* | 2026-09-19 / 5445/QĐ-ĐHBK | 2 448 | audience=student, category=grading, article=12 |
+| 4 | Điều 13. ĐATN — điều kiện được giao đề tài (`dieu-13-dieu-kien-lam-do-an-tot-nghiep`) | *như trên* | 2026-09-19 / 5445/QĐ-ĐHBK | 491 | audience=**student**, category=graduation-thesis, article=13 |
+| 5 | Điều 13. ĐATN — cách chấm điểm của người hướng dẫn, phản biện và hội đồng (`dieu-13-cham-diem-do-an-tot-nghiep`) | *như trên* | 2026-09-19 / 5445/QĐ-ĐHBK | 970 | audience=**faculty**, category=graduation-thesis, article=13 |
+| 6 | Điều 14–15. Đăng ký tốt nghiệp, điểm TB toàn khóa và hạng tốt nghiệp (`dieu-14-15-dang-ky-tot-nghiep-va-hang-tot-nghiep`) | *như trên* | 2026-09-19 / 5445/QĐ-ĐHBK | 2 638 | audience=student, category=graduation, article=14-15 |
+| 7 | Điều 16. Nghỉ học tạm thời và tự nguyện thôi học (`dieu-16-nghi-hoc-tam-thoi-va-thoi-hoc`) | *như trên* | 2026-09-19 / 5445/QĐ-ĐHBK | 2 260 | audience=student, category=leave-of-absence, article=16 |
+| 8 | Điều 17. Chuyển chương trình đào tạo, hình thức đào tạo (`dieu-17-chuyen-chuong-trinh-dao-tao`) | *như trên* | 2026-09-19 / 5445/QĐ-ĐHBK | 2 081 | audience=student, category=program-transfer, article=17 |
+| 9 | Điều 18. Học cùng lúc hai chương trình (`dieu-18-hoc-cung-luc-hai-chuong-trinh`) | *như trên* | 2026-09-19 / 5445/QĐ-ĐHBK | 1 882 | audience=student, category=dual-program, article=18 |
+| 10 | Điều 19–20. Cảnh báo học tập, buộc thôi học và xử lý vi phạm (`dieu-19-20-canh-bao-hoc-tap-va-buoc-thoi-hoc`) | *như trên* | 2026-09-19 / 5445/QĐ-ĐHBK | 2 014 | audience=student, category=academic-warning, article=19-20 |
+| | **Tổng** | 1 nguồn | | **19 368** | 10 tài liệu, 9 student + 1 faculty |
+
+Tất cả 10 tài liệu còn có chung: `department=academic-affairs`, `language=vi`, `chapter="Chương II — Đào tạo đại học"`, `issuer`, `issued_date=2025-05-28`, `source_document`.
+
+**Vì sao Điều 13 được tách làm hai tài liệu với `audience` khác nhau?** Khoản 2 Điều 13 gồm điểm a (công thức 0,5/0,5 — sinh viên cần biết) và các điểm b–d (cách người hướng dẫn/phản biện/hội đồng cho điểm, điểm liệt — hướng dẫn cho giảng viên). Tách ra để có một tài liệu `faculty` thật sự trong corpus; nhờ đó câu hỏi số 5 mới chứng minh được `metadata_filter={"audience": "student"}` thay đổi kết quả (không lọc → tài liệu faculty chiếm top-1).
 
 **Danh sách kiểm tra quản trị dữ liệu (Data governance checklist):**
-- [ ] Tập tài liệu (Corpus) chỉ chứa nguồn công khai/được phép dùng và không chứa dữ liệu cá nhân, thông tin đăng nhập hoặc tài liệu nội bộ.
-- [ ] Mỗi tài liệu có `source_url`, `retrieved_at`, `document_version` (hoặc ngày hiệu lực) trong metadata.
+- [x] Tập tài liệu (Corpus) chỉ chứa nguồn công khai/được phép dùng và không chứa dữ liệu cá nhân, thông tin đăng nhập hoặc tài liệu nội bộ. *(PDF công khai trên ctt.hust.edu.vn; nội dung là văn bản quy phạm nội bộ được phổ biến rộng rãi cho sinh viên. Hai file template `data/university/*.md` của đề bài với `source_url` giả `example.edu` đã được xoá khỏi corpus.)*
+- [x] Mỗi tài liệu có `source_url`, `retrieved_at`, `document_version` (hoặc ngày hiệu lực) trong metadata. *(Kiểm tra tự động bằng `load_corpus()` trong `scripts/compare_strategies.py`: 10/10 đủ 4 trường bắt buộc.)*
 
 ### Cấu trúc Metadata (Metadata Schema)
 
+Metadata nằm trong YAML frontmatter của từng file `.md`, được đọc khi ingest và gắn vào **mọi chunk** của tài liệu (cộng thêm `doc_id`, `chunk_index`, `section` sinh ra lúc chunk).
+
 | Trường metadata | Kiểu | Ví dụ giá trị | Tại sao hữu ích cho truy xuất (retrieval)? |
 |----------------|------|---------------|-------------------------------|
-| | | | |
-| | | | |
+| `audience` | enum `student` / `faculty` / `staff` / `all` | `student` | Trường lọc bắt buộc của L3A. Cùng một chủ đề (chấm ĐATN) có bản cho sinh viên và bản cho giảng viên; lọc `audience=student` tránh trả về hướng dẫn dành cho hội đồng — Q5 chứng minh filter đổi top-1. |
+| `category` | string (slug) | `academic-warning`, `registration`, `graduation` | Chủ đề nghiệp vụ của Điều. Dùng để thu hẹp không gian tìm kiếm khi câu hỏi mơ hồ về từ vựng — ví dụ Q2 "buộc thôi học" bị nhầm sang "tự nguyện thôi học" (`leave-of-absence`); lọc `category=academic-warning` loại nhiễu này. |
+| `article` | string | `"10"`, `"14-15"` | Cho phép truy vấn kiểu tra cứu trực tiếp ("Điều 16 nói gì?") và để agent trích dẫn nguồn "theo Điều X". |
+| `section` (sinh lúc chunk) | string | `"Điều 19. Cảnh báo học tập và buộc thôi học › Khoản 3. Buộc thôi học"` | Breadcrumb của `SectionChunker` v2: giữ ngữ cảnh Điều/Khoản cho chunk mà không nhồi vào nội dung được embed; agent dùng để trích dẫn "Điều 19 Khoản 3". |
+| `source_url` | URL | `https://ctt.hust.edu.vn/.../QCDT_2025_5445_QD-DHBK.pdf` | Truy vết câu trả lời về văn bản gốc; bắt buộc theo đề. |
+| `retrieved_at` | date ISO | `2026-09-19` | Biết dữ liệu lấy khi nào để kiểm tra độ mới khi quy chế được sửa đổi. |
+| `document_version` | string | `"5445/QĐ-ĐHBK"` (kèm `issued_date=2025-05-28`) | Phân biệt phiên bản quy chế (quy chế cũ 2021 vs 2025) — điều kiện tiên quyết để không trả lời theo quy định đã hết hiệu lực. |
+| `department`, `language`, `chapter`, `issuer` | string | `academic-affairs`, `vi`, `Chương II — Đào tạo đại học` | Hiện đồng nhất trong corpus nên chưa dùng để lọc; giữ sẵn để khi mở rộng sang quy định thư viện/ký túc xá/học phí (khác `department`) hoặc bản tiếng Anh (`language=en`) thì filter hoạt động ngay. |
 
 ---
 
